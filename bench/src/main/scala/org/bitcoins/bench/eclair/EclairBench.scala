@@ -46,10 +46,11 @@ object EclairBench extends App with EclairRpcTestUtil {
   val LogbackXml = None // Some("~/logback.xml")
 
   // don't forget to recreate `eclair` Postgres database before starting a new test
-  EclairRpcTestUtil.customConfigMap = Map(
-    "eclair.db.driver" -> "psql",
+  val CustomConfigMap: Map[String, String] = Map(
+    "eclair.file-backup.enabled" -> "false",
+    "eclair.db.driver" -> "postgres"
 //    "eclair.db.psql.pool.max-size" -> 12,
-    "eclair.db.psql.lock-type" -> "none"
+//    "eclair.db.psql.lock-type" -> "none"
 //    "eclair.db.psql.lock-type" -> "optimistic"
 //    "eclair.db.psql.lock-type" -> "exclusive"
   )
@@ -128,13 +129,16 @@ object EclairBench extends App with EclairRpcTestUtil {
   }
 
   val res: Future[Unit] = for {
-    network <- EclairNetwork.start(TestEclairVersion,
-                                   TestEclairCommit,
-                                   SenderEclairVersion,
-                                   SenderEclairCommit,
-                                   NetworkSize,
-                                   ChannelAmount,
-                                   LogbackXml)
+    network <- EclairNetwork.start(
+      TestEclairVersion,
+      TestEclairCommit,
+      SenderEclairVersion,
+      SenderEclairCommit,
+      NetworkSize,
+      ChannelAmount,
+      LogbackXml,
+      testNodeConfigOverrides = CustomConfigMap
+    )
     log <- runTests(network).recoverWith { case e: Throwable =>
       e.printStackTrace()
       Future.successful(Vector.empty[PaymentLogEntry])

@@ -770,11 +770,14 @@ trait EclairRpcTestUtil extends Logging {
         networkSize: Int,
         channelAmount: MilliSatoshis,
         logbackXml: Option[String],
+        testNodeConfigOverrides: Map[String, String] = Map.empty,
+        networkNodeConfigOverrides: Map[String, String] = Map.empty,
         binaryDirectory: Path = EclairRpcTestClient.sbtBinaryDirectory)(implicit
         system: ActorSystem): Future[EclairNetwork] = {
       import system.dispatcher
       for {
         bitcoind <- startedBitcoindRpcClient()
+        _ = { EclairRpcTestUtil.customConfigMap = testNodeConfigOverrides }
         testEclairInstance =
           EclairRpcTestUtil.eclairInstance(bitcoind, logbackXml = logbackXml)
         testEclairNode = new EclairRpcClient(testEclairInstance,
@@ -784,6 +787,7 @@ trait EclairRpcTestUtil extends Logging {
                                                binaryDirectory))
         _ <- testEclairNode.start()
         _ <- awaitEclairInSync(testEclairNode, bitcoind)
+        _ = { EclairRpcTestUtil.customConfigMap = networkNodeConfigOverrides }
         networkEclairInstances =
           1
             .to(networkSize)
