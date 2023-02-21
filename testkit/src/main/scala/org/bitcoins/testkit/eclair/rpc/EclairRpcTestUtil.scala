@@ -752,12 +752,15 @@ trait EclairRpcTestUtil extends Logging {
       networkEclairNodes: Vector[EclairRpcClient],
       channelIds: Vector[FundedChannelId]) {
 
-    def shutdown()(implicit ec: ExecutionContext): Future[Unit] =
+    def shutdown(): Future[Unit] = {
+      implicit val ec: scala.concurrent.ExecutionContext =
+        scala.concurrent.ExecutionContext.global
       for {
         _ <- Future.sequence(networkEclairNodes.map(_.stop()))
         _ <- testEclairNode.stop()
         _ <- bitcoind.stop()
       } yield ()
+    }
   }
 
   object EclairNetwork {

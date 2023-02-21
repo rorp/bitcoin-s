@@ -75,6 +75,9 @@ trait CLightningRpcTestUtil extends Logging {
        |bitcoin-rpcconnect=127.0.0.1
        |bitcoin-rpcport=${bitcoindInstance.rpcUri.getPort}
        |log-file=${datadir.resolve("clightning.log")}
+       |wallet=postgres://roma:pass@localhost:5432/lightningd
+       |bookkeeper-db=postgres://roma:pass@localhost:5432/accounts
+       |log-level=info
        |""".stripMargin
   }
 
@@ -119,17 +122,20 @@ trait CLightningRpcTestUtil extends Logging {
     import system.dispatcher
     TestAsyncUtil.retryUntilSatisfiedF(
       conditionF = () => clientInSync(clightning, bitcoind),
+      maxTries = 100,
       interval = 1.seconds)
   }
 
   private def clientInSync(
       client: CLightningRpcClient,
       bitcoind: BitcoindRpcClient)(implicit
-      ec: ExecutionContext): Future[Boolean] =
-    for {
+      ec: ExecutionContext): Future[Boolean] = {
+    val res = for {
       blockCount <- bitcoind.getBlockCount
       info <- client.getInfo
     } yield info.blockheight == blockCount
+    res.recover { e: Throwable => println(e.getMessage); false }
+  }
 
   /** Shuts down an clightning daemon and the bitcoind daemon it is associated with
     */

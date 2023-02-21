@@ -43,7 +43,7 @@ abstract class CLightningUnixSocketHandler { self: CLightningRpcClient =>
                 val errMsg =
                   s"Error for command=$commandName, error code: ${err.code}, msg: ${err.message}"
                 logger.error(errMsg)
-                throw new RuntimeException(err.message)
+                throw new RuntimeException(errMsg)
               case JsError(_) =>
                 throw new RuntimeException(
                   s"Could not parse error for command: $commandName, json: $errJs")
