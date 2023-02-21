@@ -19,10 +19,10 @@ TaskKeys.downloadCLightning := {
     Files.createDirectories(binaryDir)
   }
 
-  val version = "0.10.2"
+  val version = "22.11.1"
 
   val (platform, suffix) =
-    if (Properties.isLinux) ("Ubuntu-20.04", "tar.xz")
+    if (Properties.isLinux) ("Ubuntu-22.04", "tar.xz")
 //    else if (Properties.isMac) ("darwin-amd64", "tar.gz") // todo c-lightning adding in a future release
     else sys.error(s"Unsupported OS: ${Properties.osName}")
 
@@ -53,7 +53,7 @@ TaskKeys.downloadCLightning := {
 
     val expectedHash =
       if (Properties.isLinux)
-        "de61bb1dec0f656e192f896de7dcb08f4b07cf9c2bdaef8c78d860cd80ea6776"
+        "d87ec739e443f9efb54ec646349e7515d07884f9cb93c92c91fd8d1813436e4a"
       else sys.error(s"Unsupported OS: ${Properties.osName}")
 
     val success = hash.equalsIgnoreCase(expectedHash)
